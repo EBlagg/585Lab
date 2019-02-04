@@ -10,15 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-# Building Book
-
-```{r}
-
-# Need to install emo to open the book
-devtools::install_github("hadley/emo")
-```
-
-
 ```{r, message=FALSE, echo = FALSE}
 # Load in requisite libraries
 # install.packages(c("maps", "mapdata"))
@@ -30,7 +21,13 @@ library(mapdata)
 
 ```
 
-# US Weather Stations
+# Part One: Building the Book
+
+*Deliverable (1):* The last word of Chapter 15 is “packages”
+*Deliverable (2):* The biggest problem we encountered when trying to build the book is to install all of the packages that the book required to compile. Everytime we knitted the book, the execution was halted and `R` would indicate which package would need to be installed. The following packages were required for installation: sloop, vctrs, RSQLite, profvis, bench, ggbeeswarm. Another important thing to note is that the book required the package “emo” which was not available on CRAN. Because it was not available on CRAN we had to use the `devtools` to install “emo” from Hadley’s Git Repo.
+
+# Part Two: US Weather Stations
+
 
 ```{r, echo=FALSE, message = FALSE}
 # Read in the data for each directory
