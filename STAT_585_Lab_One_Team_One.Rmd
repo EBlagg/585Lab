@@ -11,16 +11,43 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, message=FALSE, echo = FALSE}
 # Load in requisite libraries
+# install.packages(c("maps", "mapdata"))
 
 library(tidyverse)
-library(gridExtra)
+library(ggmap)
+library(maps)
+library(mapdata)
+
 ```
 
-```{r}
+# US Weather Stations
+
+```{r, echo=FALSE}
 # Read in the data for each directory
 
 # Make sure your working directory is pointed to the right file path for this lab please
 dataDir <- getwd()
+
 weather1 <- read_fwf(file.path(dataDir,"ushcn-v2.5-stations.txt"), fwf_cols(country_code = c(1,2), network_code = 3, id_placeholders = c(4,5), coop_id = c(6,11), latitude = c(13,20), longitude = c(22,30), elevation = c(33,37), state = c(39,40), name = c(42,71), comp1 = c(73,78), comp2 = c(80,85), comp3 = c(87,92), utc_offset = c(94,95)))
+
+usa <- map_data("state")
+
+```
+
+
+```{r}
+weather1 <- weather1 %>%
+  mutate(elevation = as.numeric(elevation))
+
+usa <- usa %>%
+  mutate(time_zone = ifelse(region %in% c("maine", "vermont", "new hampshire", "massachusetts", "rhode island", "conneticut", "new york", "pennsylvania", "new jersey", "delaware", "maryland", "district of columbia", "virginia", "west virginia", "ohio", "michigan", "indiana", "north carolina", "south carolina", "georgia", "florida", "connecticut"), "ETZ",
+                            ifelse(region %in% c("wisconsin", "illinois", "kentucky", "tennessee", "alabama", "mississippi", "minnesota", "iowa", "missouri", "arkansas", "louisiana", "north dakota", "south dakota", "nebraska", "kansas", "oklahoma", "texas", ""), "CTZ", 
+                                   ifelse( region %in% c("montana", "wyoming", "colorado", "new mexico", "idaho", "utah", "arizona"), "MTZ", "PTZ"))))
+
+ggplot() + 
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group, fill = time_zone, alpha = 0.2), color = "black") + 
+  geom_point(data = weather1, aes(x = longitude, y = latitude, colour = elevation))+
+  coord_fixed(1.3)
+  
 ```
 
