@@ -1,7 +1,7 @@
 ---
 title: "STAT 585 Lab One"
 author: "Eryn Blagg, Katherine Goode, Ju Ji, Charlotte Roiger"
-date: "2/3/2019"
+date: "2/4/2019"
 output: html_document
 ---
 
@@ -9,16 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r, message=FALSE, echo = FALSE}
 # Load in requisite libraries
 # install.packages(c("maps", "mapdata"))
-
 library(tidyverse)
 library(ggmap)
 library(maps)
 library(mapdata)
-
 ```
 
 # Part One: Building the Book
@@ -29,7 +26,6 @@ library(mapdata)
 
 # Part Two: US Weather Stations
 
-
 ```{r, echo=FALSE, message = FALSE}
 # Read in the data for each directory
 
@@ -37,103 +33,62 @@ library(mapdata)
 dataDir <- getwd()
 
 # Load in data, chosen to specify start and stopping point for each column in data frame
-weather1 <- read_fwf(file.path(dataDir,"ushcn-v2.5-stations.txt"), fwf_cols(country_code = c(1,2), network_code = 3, id_placeholders = c(4,5), coop_id = c(6,11), latitude = c(13,20), longitude = c(22,30), elevation = c(33,37), state = c(39,40), name = c(42,71), comp1 = c(73,78), comp2 = c(80,85), comp3 = c(87,92), utc_offset = c(94,95)))
+weather1 <- read_fwf(file.path(dataDir,"ushcn-v2.5-stations.txt"), 
+                     fwf_cols(country_code = c(1,2), 
+                              network_code = 3, 
+                              id_placeholders = c(4,5), 
+                              coop_id = c(6,11), 
+                              latitude = c(13,20), 
+                              longitude = c(22,30), 
+                              elevation = c(33,37), 
+                              state = c(39,40), 
+                              name = c(42,71), 
+                              comp1 = c(73,78), 
+                              comp2 = c(80,85), 
+                              comp3 = c(87,92), 
+                              utc_offset = c(94,95)))
 
 # Will also use maps from the mapdata package for visualization
 usa <- map_data("state")
-
 ```
 
-
 ```{r echo = FALSE}
-# Change levation to be a numeric rather than factor
-weather1 <- weather1 %>%
-  mutate(elevation = as.numeric(elevation)) %>%
-  mutate(case = 1:n())
+# Change elevation to be a numeric rather than factor
+weather2 <- weather1 %>%
+  mutate(elevation = as.numeric(elevation),
+         time_zone = factor(utc_offset)) %>%
+  mutate(time_zone = forcats::fct_recode(time_zone, 
+                                         "ETZ" = "5", "CTZ" = "6", 
+                                         "MTZ" = "7", "PTZ" = "8")) %>%
+  mutate(time_zone = forcats::fct_relevel(time_zone, "CTZ", "ETZ", "MTZ", "PTZ"))
+```
 
+```{r}
 # Create a variable that accounts for the timezone of each state 
 # THERE HAS TO BE A BETTER WAY TO DO THIS
 usa <- usa %>%
   mutate(time_zone = ifelse(region %in% c("maine", "vermont", "new hampshire", "massachusetts", "rhode island", "conneticut", "new york", "pennsylvania", "new jersey", "delaware", "maryland", "district of columbia", "virginia", "west virginia", "ohio", "michigan", "indiana", "north carolina", "south carolina", "georgia", "florida", "connecticut"), "ETZ",
                             ifelse(region %in% c("wisconsin", "illinois", "kentucky", "tennessee", "alabama", "mississippi", "minnesota", "iowa", "missouri", "arkansas", "louisiana", "north dakota", "south dakota", "nebraska", "kansas", "oklahoma", "texas", ""), "CTZ", 
-                                   ifelse( region %in% c("montana", "wyoming", "colorado", "new mexico", "idaho", "utah", "arizona"), "MTZ", "PTZ"))))
-
-  
+                                   ifelse( region %in% c("montana", "wyoming", "colorado", "new mexico", "idaho", "utah", "arizona"), "MTZ", "PTZ")))) %>%
+  mutate(time_zone = factor(time_zone))
 ```
-
 
 ```{r}
 # Visualize elevation, state, and time zone of each station
-
 ggplot() + 
-  geom_polygon(data = usa, aes(x=long, y = lat, group = group, fill = time_zone), 
-               alpha = 0.2, 
-               color = "black") + 
-  geom_point(data = weather1, aes(x = longitude, y = latitude, colour = elevation)) +
+  geom_polygon(data = usa, 
+               aes(x = long, y = lat, group = group, fill = factor(time_zone)),
+               alpha = 0.3,
+               color = "black") +
+  geom_point(data = weather2,
+             aes(x = longitude, y = latitude, colour = time_zone, alpha = elevation)) +
   coord_fixed(1.3) + 
-  gretchenalbrecht::scale_fill_gretchenalbrecht(palette="red_sky_golden_cloud",
-                             discrete = TRUE, alpha = 0.1) + 
-  scale_colour_gradient(low = "green", high = "orange") + 
+  scale_fill_manual(values = c("#3C3C3C", "#7896B4", "#E6E6DC", "#FAAA72"),
+                    name = "Time Zone") +
+  scale_color_manual(values = c("#3C3C3C", "#7896B4", "#E6E6DC", "#FAAA72"),
+                     name = "Time Zone") + 
+  labs(alpha = "Elevation") +
   theme_bw()
-
-library(pracma)
-install.packages("pracma")
-
-zone_check <- function(case){
-  
-  check_CTZ <- inpolygon(x = weather1$longitude[case], 
-                         y = weather1$latitude[case], 
-                         xp = usa %>% filter(time_zone == "CTZ") %>% pull(long), 
-                         yp = usa %>% filter(time_zone == "CTZ") %>% pull(lat), 
-                         boundary = FALSE)
-  
-  if(check_CTZ == TRUE){
-    zone <- "CTZ"
-  } else {
-    check_ETZ <- inpolygon(x = weather1$longitude[case], 
-                           y = weather1$latitude[case], 
-                           xp = usa %>% filter(time_zone == "ETZ") %>% pull(long), 
-                           yp = usa %>% filter(time_zone == "ETZ") %>% pull(lat), 
-                           boundary = FALSE)
-  }
-  
-  if(check_ETZ == TRUE){
-    zone <- "ETZ"
-  } else {
-    check_MTZ <- inpolygon(x = weather1$longitude[case], 
-                         y = weather1$latitude[case], 
-                         xp = usa %>% filter(time_zone == "MTZ") %>% pull(long), 
-                         yp = usa %>% filter(time_zone == "MTZ") %>% pull(lat), 
-                         boundary = FALSE)
-  }
-  
-  if(check_MTZ == TRUE){
-    zone <- "MTZ"
-  } else {
-    check_PTZ <- inpolygon(x = weather1$longitude[case], 
-                         y = weather1$latitude[case], 
-                         xp = usa %>% filter(time_zone == "PTZ") %>% pull(long), 
-                         yp = usa %>% filter(time_zone == "PTZ") %>% pull(lat), 
-                         boundary = FALSE)
-  }
-  
-  if(check_PTZ == TRUE){
-    zone <- "PTZ"
-  } else {
-    zone <- NA
-  }
-  
-  return(data.frame(case, zone))
-
-}
-
-zone_check(case = 1)
-
-purrr::map_df(weather1$case[1:10], zone_check)
-
-usa
-weather1
-gretchenalbrecht::gretchenalbrecht_palettes
 ```
 
 # More Weather Stations
