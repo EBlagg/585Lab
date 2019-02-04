@@ -73,11 +73,39 @@ ggplot() +
 # More Weather Stations
 
 ```{r}
-# ERROR 
+# Untar the file to create a new folder in our repository 
+# obtain a list of files
+numfiles <- untar("ushcn.tavg.latest.raw.tar.gz", list = TRUE)
 
-# fn <- "ftp://ftp.ncdc.noaa.gov/pub/data/ushcn/v2.5/ushcn.tavg.latest.raw.tar.gz"
-# download.file(fn,destfile="tmp.tar.gz")
-# untar("tmp.tar.gz",files="tavg.latest.csv")
-# X <- read.csv("tavg.latest.csv")
+# Count the number of files in our new folder
+length(numfiles)
+
 ```
 
+Our team home towns are Omaha, NE; Green Lake, WI; and Minneapolis, MN. From 
+examining the data the only hometown that is present in the NOAA dataset is 
+minneapolis, which is designated "MINNEAPOLIS/ST PAUL AP". We will now search
+for the file name. First we need to condense the first four columns into 
+a unified ID number
+
+```{r}
+
+# Create the unified ID number to find the file name for Minneapolis
+weather1 <- weather1 %>%
+  unite(united_id, country_code, network_code, id_placeholders, coop_id, sep = "")
+
+# Let's find the unified ID number for MINNEAPOLIS/ST PAUL AP
+
+weather1[weather1$name=="MINNEAPOLIS/ST PAUL AP", ]$united_id
+
+
+```
+This means the unified ID number for the Minneapolis/St.Paul area is shown above.
+Now we will find the file name associated with thie united ID number.
+
+```{r}
+numfiles[grep("USH00215435", numfiles)]
+```
+
+This should be the file name correlated with the file containing the average 
+temperature for Minneapolis/St. Paul.
