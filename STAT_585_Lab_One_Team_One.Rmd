@@ -22,7 +22,7 @@ library(mapdata)
 
 # US Weather Stations
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE}
 # Read in the data for each directory
 
 # Make sure your working directory is pointed to the right file path for this lab please
