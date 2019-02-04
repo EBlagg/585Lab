@@ -136,7 +136,7 @@ weather1
 gretchenalbrecht::gretchenalbrecht_palettes
 ```
 
-# More Weather Stations
+# Parth Three: More Weather Stations
 
 ```{r}
 # Untar the file to create a new folder in our repository 
@@ -166,6 +166,7 @@ weather1[weather1$name=="MINNEAPOLIS/ST PAUL AP", ]$united_id
 
 
 ```
+
 This means the unified ID number for the Minneapolis/St.Paul area is shown above.
 Now we will find the file name associated with thie united ID number.
 
