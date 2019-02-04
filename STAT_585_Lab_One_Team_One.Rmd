@@ -48,7 +48,8 @@ usa <- map_data("state")
 ```{r echo = FALSE}
 # Change levation to be a numeric rather than factor
 weather1 <- weather1 %>%
-  mutate(elevation = as.numeric(elevation))
+  mutate(elevation = as.numeric(elevation)) %>%
+  mutate(case = 1:n())
 
 # Create a variable that accounts for the timezone of each state 
 # THERE HAS TO BE A BETTER WAY TO DO THIS
@@ -65,9 +66,74 @@ usa <- usa %>%
 # Visualize elevation, state, and time zone of each station
 
 ggplot() + 
-  geom_polygon(data = usa, aes(x=long, y = lat, group = group, fill = time_zone, alpha = 0.2), color = "black") + 
-  geom_point(data = weather1, aes(x = longitude, y = latitude, colour = elevation))+
-  coord_fixed(1.3)
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group, fill = time_zone), 
+               alpha = 0.2, 
+               color = "black") + 
+  geom_point(data = weather1, aes(x = longitude, y = latitude, colour = elevation)) +
+  coord_fixed(1.3) + 
+  gretchenalbrecht::scale_fill_gretchenalbrecht(palette="red_sky_golden_cloud",
+                             discrete = TRUE, alpha = 0.1) + 
+  scale_colour_gradient(low = "green", high = "orange") + 
+  theme_bw()
+
+library(pracma)
+install.packages("pracma")
+
+zone_check <- function(case){
+  
+  check_CTZ <- inpolygon(x = weather1$longitude[case], 
+                         y = weather1$latitude[case], 
+                         xp = usa %>% filter(time_zone == "CTZ") %>% pull(long), 
+                         yp = usa %>% filter(time_zone == "CTZ") %>% pull(lat), 
+                         boundary = FALSE)
+  
+  if(check_CTZ == TRUE){
+    zone <- "CTZ"
+  } else {
+    check_ETZ <- inpolygon(x = weather1$longitude[case], 
+                           y = weather1$latitude[case], 
+                           xp = usa %>% filter(time_zone == "ETZ") %>% pull(long), 
+                           yp = usa %>% filter(time_zone == "ETZ") %>% pull(lat), 
+                           boundary = FALSE)
+  }
+  
+  if(check_ETZ == TRUE){
+    zone <- "ETZ"
+  } else {
+    check_MTZ <- inpolygon(x = weather1$longitude[case], 
+                         y = weather1$latitude[case], 
+                         xp = usa %>% filter(time_zone == "MTZ") %>% pull(long), 
+                         yp = usa %>% filter(time_zone == "MTZ") %>% pull(lat), 
+                         boundary = FALSE)
+  }
+  
+  if(check_MTZ == TRUE){
+    zone <- "MTZ"
+  } else {
+    check_PTZ <- inpolygon(x = weather1$longitude[case], 
+                         y = weather1$latitude[case], 
+                         xp = usa %>% filter(time_zone == "PTZ") %>% pull(long), 
+                         yp = usa %>% filter(time_zone == "PTZ") %>% pull(lat), 
+                         boundary = FALSE)
+  }
+  
+  if(check_PTZ == TRUE){
+    zone <- "PTZ"
+  } else {
+    zone <- NA
+  }
+  
+  return(data.frame(case, zone))
+
+}
+
+zone_check(case = 1)
+
+purrr::map_df(weather1$case[1:10], zone_check)
+
+usa
+weather1
+gretchenalbrecht::gretchenalbrecht_palettes
 ```
 
 # More Weather Stations
