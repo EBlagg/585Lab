@@ -9,6 +9,16 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+# Building Book
+
+```{r}
+
+# Need to install emo to open the book
+devtools::install_github("hadley/emo")
+```
+
+
 ```{r, message=FALSE, echo = FALSE}
 # Load in requisite libraries
 # install.packages(c("maps", "mapdata"))
