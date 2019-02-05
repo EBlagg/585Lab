@@ -1,5 +1,5 @@
 ---
-title: "STAT 585 Lab One - Team One"
+title: "STAT 585 Lab One"
 author: "Eryn Blagg, Katherine Goode, Ju Ji, Charlotte Roiger"
 date: "2/4/2019"
 output: html_document
@@ -9,10 +9,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ```
 
-Our lab repository can be found [here](https://github.com/EBlagg/585Lab). The following packages were used in this write up.
-
-```{r}
+```{r, message=FALSE, echo = FALSE}
 # Load in requisite libraries
+# install.packages(c("maps", "mapdata"))
 library(tidyverse)
 library(ggmap)
 library(maps)
