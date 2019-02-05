@@ -1,5 +1,5 @@
 ---
-title: "STAT 585 Lab One"
+title: "STAT 585 Lab One - Team One"
 author: "Eryn Blagg, Katherine Goode, Ju Ji, Charlotte Roiger"
 date: "2/4/2019"
 output: html_document
@@ -9,9 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ```
 
-```{r, message=FALSE, echo = FALSE}
+Our lab repository can be found [here](https://github.com/EBlagg/585Lab). The following packages were used in this write up.
+
+```{r}
 # Load in requisite libraries
-# install.packages(c("maps", "mapdata"))
 library(tidyverse)
 library(ggmap)
 library(maps)
@@ -94,20 +95,21 @@ usa <- usa %>%
 
 The code below creates a plot of the latitude versus longitude locations in the weather data plotted on a map of the contiguous US. The states and points are colored by the time zone where the plots are located, and the darkness of the points represents the elevation.
 
+
 ```{r fig.width = 10}
 # Visualize elevation, state, and time zone of each station
 ggplot() + 
   geom_polygon(data = usa, 
                aes(x = long, y = lat, group = group, fill = factor(time_zone)),
-               alpha = 0.1,
+               alpha = 0.3,
                color = "black") +
   geom_point(data = weather,
              aes(x = longitude, y = latitude, colour = time_zone, alpha = elevation),
              size = 2) +
   coord_fixed(1.3) + 
-  scale_fill_manual(values = c("#7896B4", "#FAAA72", "#3C3C3C", "#BE5C55"),
+  scale_fill_manual(values = c("#87A1B9", "#E08865", "#3C3C3C", "#F7B281"),
                     name = "Time Zone") +
-  scale_color_manual(values = c("#7896B4", "#FAAA72", "#3C3C3C", "#BE5C55"),
+  scale_color_manual(values = c("#87A1B9", "#E08865", "#3C3C3C", "#F7B281"),
                      name = "Time Zone") + 
   labs(x = "Longitude", y = "Latitude", alpha = "Elevation") +
   theme_bw()
